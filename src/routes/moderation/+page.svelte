@@ -5,11 +5,10 @@
 
 	import {Send} from "lucide-svelte";
 
-	let blacklist: string;
-
 	import { io } from "socket.io-client";
 	const socket = io("localhost:8080");
 
+	let blacklist: string;
 	function submitBlacklist() {
 		let data = blacklist.split("\n")
 		socket.emit("set_blacklist", data);

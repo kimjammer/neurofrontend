@@ -7,6 +7,7 @@
 	import { Sun, Moon } from "lucide-svelte";
 </script>
 <svelte:head>
+	<title>Neuro Control Panel</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
@@ -39,7 +40,7 @@
 			<div class="text-lg font-semibold text-right">Welcome, KimJammer</div>
 
 			<Avatar.Root>
-				<Avatar.Image src="https://github.com/shadcn.png" alt="@shadcn" />
+				<Avatar.Image src="https://www.kimjammer.com/icons/Logo.svg" alt="@shadcn" />
 				<Avatar.Fallback>CN</Avatar.Fallback>
 			</Avatar.Root>
 

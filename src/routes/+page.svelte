@@ -9,16 +9,157 @@
 	import { Switch } from "$lib/components/ui/switch";
 	import * as Select from "$lib/components/ui/select";
 
+	import { type Props } from "$lib/components/ui/button/.";
+
 	import {BrainCircuit, CircleOff, VolumeX, MicOff, Move, Play, Sparkles, Send} from "lucide-svelte";
 
 	//TODO: Placeholder for Song Select
-	const fruits = [
-		{ value: "apple", label: "Apple" },
-		{ value: "banana", label: "Banana" },
-		{ value: "blueberry", label: "Blueberry" },
-		{ value: "grapes", label: "Grapes" },
-		{ value: "pineapple", label: "Pineapple" }
+	const songs = [
+		{ value: "apple", label: "Song 1" },
+		{ value: "banana", label: "Song 2" },
+		{ value: "blueberry", label: "Song 3" },
+		{ value: "grapes", label: "Song 4" },
+		{ value: "pineapple", label: "Song 5" }
 	];
+
+	// Setup socket.io client
+	import { io } from "socket.io-client";
+	const socket = io("localhost:8080");
+
+	//Current Message Section
+	let currentMessage = "";
+	socket.on("current_message", (message: string) => {
+		currentMessage = message;
+	});
+	function abortMessage() {
+		socket.emit("abort_current_message");
+	}
+
+	//Next Message Section
+	let nextMessage = "";
+	socket.on("reset_next_message", () => {
+		nextMessage = "";
+	});
+	socket.on("next_chunk", (message: string) => {
+		nextMessage += message;
+	});
+	function cancelMessage() {
+		socket.emit("cancel_next_message");
+	}
+
+	//Signals Section
+	let AI_thinking = false;
+	socket.on("AI_thinking", (message: boolean) => {
+		console.log("AI Thinking: ", message);
+		AI_thinking = message;
+	});
+	let AI_speaking = false;
+	socket.on("AI_speaking", (message: boolean) => {
+		AI_speaking = message;
+	});
+	let human_speaking = false;
+	socket.on("human_speaking", (message: boolean) => {
+		console.log("Human Speaking: ", message)
+		human_speaking = message;
+	});
+	let patiencePercent = 0;
+	let total_time = 0;
+	socket.on("patience_update", (message) => {
+		//console.log("Patience: ", message.crr_time / message.total_time);
+		console.log("CRRTIME: ", message.crr_time);
+		console.log("TOTALTIME: ", message.total_time);
+		patiencePercent = (message.crr_time / message.total_time) * 100;
+		total_time = message.total_time;
+	});
+
+	//Twitch Chat Section
+	let twitchChat = "";
+	let twitchChatEnabled = true;
+	socket.on("recent_twitch_messages", (message) => {
+		twitchChat = message.join("\n");
+	});
+	socket.on("twitch_status", (message: boolean) => {
+		console.log("Twitch Chat Toggled: ", message);
+		twitchChatEnabled = message;
+	});
+	function toggleTwitchChat() {
+		twitchChatEnabled = !twitchChatEnabled;
+		if (twitchChatEnabled) {
+			socket.emit("enable_twitch");
+		} else {
+			socket.emit("disable_twitch");
+		}
+	}
+
+	//Controls Section
+	let LLMEnabled = true;
+	let TTSEnabled = true;
+	let STTEnabled = true;
+	let movementEnabled = true;
+	let LLMVariant: Props['variant'];
+	$: LLMVariant = LLMEnabled ? "default" : "destructive";
+	let TTSVariant: Props['variant']
+	$: TTSVariant = TTSEnabled ? "default" : "destructive";
+	let STTVariant: Props['variant'];
+	$: STTVariant = STTEnabled ? "default" : "destructive";
+	let movementVariant: Props['variant'];
+	$: movementVariant = movementEnabled ? "default" : "destructive";
+	socket.on("LLM_status", (message: boolean) => {
+		LLMEnabled = message;
+	});
+	socket.on("TTS_status", (message: boolean) => {
+		TTSEnabled = message;
+	});
+	socket.on("STT_status", (message: boolean) => {
+		STTEnabled = message;
+	});
+	socket.on("movement_status", (message: boolean) => {
+		movementEnabled = message;
+	});
+	function toggleLLM() {
+		LLMEnabled = !LLMEnabled;
+		if (LLMEnabled) {
+			socket.emit("enable_LLM");
+		} else {
+			socket.emit("disable_LLM");
+		}
+	}
+	function toggleTTS() {
+		TTSEnabled = !TTSEnabled;
+		if (TTSEnabled) {
+			socket.emit("enable_TTS");
+		} else {
+			socket.emit("disable_TTS");
+		}
+	}
+	function toggleSTT() {
+		STTEnabled = !STTEnabled;
+		if (STTEnabled) {
+			socket.emit("enable_STT");
+		} else {
+			socket.emit("disable_STT");
+		}
+	}
+	function toggleMovement() {
+		movementEnabled = !movementEnabled;
+		if (movementEnabled) {
+			socket.emit("enable_movement");
+		} else {
+			socket.emit("disable_movement");
+		}
+	}
+
+	//Sing Section
+
+	//Behavior Section
+	function funFact() {
+		socket.emit("fun_fact");
+	}
+	let topic = "";
+	function newTopic() {
+		socket.emit("new_topic", topic);
+		topic = "";
+	}
 </script>
 
 <div class="w-full h-full flex border-t-2">
@@ -29,10 +170,10 @@
 				<Card.Description></Card.Description>
 			</Card.Header>
 			<Card.Content class="grow">
-				<Textarea placeholder="Type your message here." class="resize-none h-full"/>
+				<Textarea placeholder="Type your message here." class="resize-none h-full" bind:value={currentMessage}/>
 			</Card.Content>
 			<Card.Footer>
-				<Button variant="destructive">Abort Message</Button>
+				<Button variant="destructive" on:click={abortMessage}>Abort Message</Button>
 			</Card.Footer>
 		</Card.Root>
 		<Card.Root class="xl:w-[480px] grow flex flex-col">
@@ -41,10 +182,10 @@
 				<Card.Description></Card.Description>
 			</Card.Header>
 			<Card.Content class="grow">
-				<Textarea placeholder="Type your message here." class="resize-none h-full"/>
+				<Textarea placeholder="Type your message here." class="resize-none h-full" bind:value={nextMessage}/>
 			</Card.Content>
 			<Card.Footer>
-				<Button variant="destructive">Cancel Message</Button>
+				<Button variant="destructive" on:click={cancelMessage}>Cancel Message</Button>
 			</Card.Footer>
 		</Card.Root>
 	</div>
@@ -56,23 +197,23 @@
 				<Card.Description></Card.Description>
 			</Card.Header>
 			<Card.Content>
-				<Toggle aria-label="Toggle AI Thinking">
+				<Toggle disabled aria-label="Toggle AI Thinking" bind:pressed={AI_thinking}>
 					<BrainCircuit class="mr-2 h-4 w-4" />
 					AI Thinking
 				</Toggle>
-				<Toggle aria-label="Toggle AI Speaking">
+				<Toggle disabled aria-label="Toggle AI Speaking" bind:pressed={AI_speaking}>
 					<BrainCircuit class="mr-2 h-4 w-4" />
 					AI Speaking
 				</Toggle>
-				<Toggle aria-label="Toggle Human Speaking">
+				<Toggle disabled aria-label="Toggle Human Speaking" bind:pressed={human_speaking}>
 					<BrainCircuit class="mr-2 h-4 w-4" />
 					Human Speaking
 				</Toggle>
 			</Card.Content>
 			<Card.Footer class="flex gap-2.5">
 				<div class="text-lg font-semibold">Patience:</div>
-				<Input disabled placeholder="0 s" class="w-1/3" />
-				<Progress value={50} />
+				<Input disabled placeholder="0 s" class="w-1/3" bind:value={total_time}/>
+				<Progress bind:value={patiencePercent} />
 			</Card.Footer>
 		</Card.Root>
 
@@ -82,33 +223,33 @@
 				<Card.Description>Messages being fed to the LLM</Card.Description>
 			</Card.Header>
 			<Card.Content class="grow">
-				<Textarea placeholder="Type your message here." class="resize-none h-full"/>
+				<Textarea placeholder="Twitch messages" class="resize-none h-full" bind:value={twitchChat}/>
 			</Card.Content>
 			<Card.Footer class="fl ex gap-2.5">
 				<Label for="twitchSwitch">Enable Twitch Chat: </Label>
-				<Switch id="twitchSwitch"/>
+				<Switch id="twitchSwitch" bind:checked={twitchChatEnabled} on:click={toggleTwitchChat}/>
 			</Card.Footer>
 		</Card.Root>
 
 		<Card.Root class="w-[480px]">
 			<Card.Header>
 				<Card.Title>Controls</Card.Title>
-				<Card.Description>Card Description</Card.Description>
+				<Card.Description></Card.Description>
 			</Card.Header>
 			<Card.Content class="grid grid-cols-2 gap-2.5">
-				<Button>
+				<Button bind:variant={LLMVariant} on:click={toggleLLM}>
 					<CircleOff class="mr-2 h-4 w-4" />
 					Disable LLM
 				</Button>
-				<Button>
+				<Button bind:variant={TTSVariant} on:click={toggleTTS}>
 					<VolumeX class="mr-2 h-4 w-4" />
 					Disable TTS
 				</Button>
-				<Button>
+				<Button bind:variant={STTVariant} on:click={toggleSTT}>
 					<MicOff class="mr-2 h-4 w-4" />
 					Disable STT
 				</Button>
-				<Button>
+				<Button bind:variant={movementVariant} on:click={toggleMovement}>
 					<Move class="mr-2 h-4 w-4" />
 					Disable Movement
 				</Button>
@@ -129,10 +270,10 @@
 					</Select.Trigger>
 					<Select.Content>
 						<Select.Group>
-							<Select.Label>Fruits</Select.Label>
-							{#each fruits as fruit}
-								<Select.Item value={fruit.value} label={fruit.label}>
-									{fruit.label}
+							<Select.Label>Playlist 1</Select.Label>
+							{#each songs as song}
+								<Select.Item value={song.value} label={song.label}>
+									{song.label}
 								</Select.Item>
 							{/each}
 						</Select.Group>
@@ -155,14 +296,14 @@
 				<Card.Description></Card.Description>
 			</Card.Header>
 			<Card.Content>
-				<Button>
+				<Button on:click={funFact}>
 					<Sparkles class="mr-2 h-4 w-4" />
 					Fun Fact
 				</Button>
 			</Card.Content>
 			<Card.Footer class="flex gap-2.5">
-				<Input placeholder="New Topic"/>
-				<Button size="icon">
+				<Input placeholder="New Topic" bind:value={topic}/>
+				<Button size="icon" on:click={newTopic}>
 					<Send class="h-4 w-4" />
 				</Button>
 			</Card.Footer>

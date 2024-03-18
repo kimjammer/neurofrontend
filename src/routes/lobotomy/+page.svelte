@@ -4,6 +4,16 @@
 	import { Button } from "$lib/components/ui/button";
 
 	import {Send} from "lucide-svelte";
+
+	// Setup socket.io client
+	import { io } from "socket.io-client";
+	const socket = io("localhost:8080");
+
+	//Lobotomy Section
+	let lobotomy = "";
+	socket.on("full_prompt", (message: string) => {
+		lobotomy = message;
+	});
 </script>
 
 <div class="w-full h-full flex border-t-2">
@@ -14,7 +24,7 @@
 				<Card.Description>Edit the brain</Card.Description>
 			</Card.Header>
 			<Card.Content class="grow">
-				<Textarea placeholder="Current Context" class="resize-none h-full"/>
+				<Textarea bind:value={lobotomy} placeholder="Current Context" class="resize-none h-full"/>
 			</Card.Content>
 			<Card.Footer>
 				<Button variant="default">
