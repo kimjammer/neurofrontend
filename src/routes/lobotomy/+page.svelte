@@ -3,7 +3,7 @@
 	import { Textarea } from "$lib/components/ui/textarea";
 	import { Button } from "$lib/components/ui/button";
 
-	import {Send} from "lucide-svelte";
+	import {Send, Trash2} from "lucide-svelte";
 
 	// Setup socket.io client
 	import { io } from "socket.io-client";
@@ -14,6 +14,10 @@
 	socket.on("full_prompt", (message: string) => {
 		lobotomy = message;
 	});
+
+	function nukeHistory() {
+		socket.emit("nuke_history");
+	}
 </script>
 
 <div class="w-full h-full flex border-t-2">
@@ -26,10 +30,14 @@
 			<Card.Content class="grow">
 				<Textarea bind:value={lobotomy} placeholder="Current Context" class="resize-none h-full"/>
 			</Card.Content>
-			<Card.Footer>
-				<Button variant="default">
+			<Card.Footer class="gap-2.5">
+				<Button variant="default" on:click={nukeHistory}>
 					<Send class="mr-2 w-4 h-4" />
 					Submit
+				</Button>
+				<Button variant="default">
+					<Trash2 class="mr-2 w-4 h-4" />
+					Nuke History
 				</Button>
 			</Card.Footer>
 		</Card.Root>
