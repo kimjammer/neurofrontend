@@ -31,7 +31,7 @@
 				<Card.Description>Edit word blacklist</Card.Description>
 			</Card.Header>
 			<Card.Content class="grow">
-				<Textarea placeholder="Current Context" class="resize-none h-full" bind:value={blacklist}/>
+				<Textarea placeholder="Current Blacklist" class="resize-none h-full" bind:value={blacklist}/>
 			</Card.Content>
 			<Card.Footer>
 				<Button variant="default" on:click={submitBlacklist}>

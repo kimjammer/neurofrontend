@@ -11,16 +11,7 @@
 
 	import { type Props } from "$lib/components/ui/button/.";
 
-	import {BrainCircuit, CircleOff, VolumeX, MicOff, Move, Play, Sparkles, Send} from "lucide-svelte";
-
-	//TODO: Placeholder for Song Select
-	const songs = [
-		{ value: "apple", label: "Song 1" },
-		{ value: "banana", label: "Song 2" },
-		{ value: "blueberry", label: "Song 3" },
-		{ value: "grapes", label: "Song 4" },
-		{ value: "pineapple", label: "Song 5" }
-	];
+	import {BrainCircuit, CircleOff, VolumeX, MicOff, Move, Play, Sparkles, Send, XOctagon, Pause, PlayCircle} from "lucide-svelte";
 
 	// Setup socket.io client
 	import { io } from "socket.io-client";
@@ -65,9 +56,6 @@
 	let patiencePercent = 0;
 	let total_time = 0;
 	socket.on("patience_update", (message) => {
-		//console.log("Patience: ", message.crr_time / message.total_time);
-		console.log("CRRTIME: ", message.crr_time);
-		console.log("TOTALTIME: ", message.total_time);
 		patiencePercent = (message.crr_time / message.total_time) * 100;
 		total_time = message.total_time;
 	});
@@ -150,6 +138,30 @@
 	}
 
 	//Sing Section
+	let selectedAudio : any;
+	$: console.log(selectedAudio);
+	let songs = [
+		{ value: "", label: "Loading..." }
+	];
+	socket.on("audio_list", (message) => {
+		console.log("Audio List: ", message);
+		songs = [];
+		message.forEach((song : any) => {
+			songs.push({ value: song, label: song });
+		});
+	});
+	function playAudio() {
+		socket.emit("play_audio", selectedAudio.value);
+	}
+	function pauseAudio() {
+		socket.emit("pause_audio");
+	}
+	function resumeAudio() {
+		socket.emit("resume_audio");
+	}
+	function abortAudio() {
+		socket.emit("abort_audio");
+	}
 
 	//Behavior Section
 	function funFact() {
@@ -170,7 +182,7 @@
 				<Card.Description></Card.Description>
 			</Card.Header>
 			<Card.Content class="grow">
-				<Textarea placeholder="Type your message here." class="resize-none h-full" bind:value={currentMessage}/>
+				<Textarea disabled placeholder="Current Message" class="resize-none h-full" bind:value={currentMessage}/>
 			</Card.Content>
 			<Card.Footer>
 				<Button variant="destructive" on:click={abortMessage}>Abort Message</Button>
@@ -182,7 +194,7 @@
 				<Card.Description></Card.Description>
 			</Card.Header>
 			<Card.Content class="grow">
-				<Textarea placeholder="Type your message here." class="resize-none h-full" bind:value={nextMessage}/>
+				<Textarea disabled placeholder="Next message" class="resize-none h-full" bind:value={nextMessage}/>
 			</Card.Content>
 			<Card.Footer>
 				<Button variant="destructive" on:click={cancelMessage}>Cancel Message</Button>
@@ -223,7 +235,7 @@
 				<Card.Description>Messages being fed to the LLM</Card.Description>
 			</Card.Header>
 			<Card.Content class="grow">
-				<Textarea placeholder="Twitch messages" class="resize-none h-full" bind:value={twitchChat}/>
+				<Textarea disabled placeholder="Twitch messages" class="resize-none h-full" bind:value={twitchChat}/>
 			</Card.Content>
 			<Card.Footer class="fl ex gap-2.5">
 				<Label for="twitchSwitch">Enable Twitch Chat: </Label>
@@ -263,28 +275,44 @@
 				<Card.Title>Sing</Card.Title>
 				<Card.Description></Card.Description>
 			</Card.Header>
-			<Card.Content class="flex gap-2.5">
-				<Select.Root portal={null}>
-					<Select.Trigger class="w-[180px]">
-						<Select.Value placeholder="Select a song"/>
-					</Select.Trigger>
-					<Select.Content>
-						<Select.Group>
-							<Select.Label>Playlist 1</Select.Label>
-							{#each songs as song}
-								<Select.Item value={song.value} label={song.label}>
-									{song.label}
-								</Select.Item>
-							{/each}
-						</Select.Group>
-					</Select.Content>
-					<Select.Input name="favoriteFruit" />
-				</Select.Root>
+			<Card.Content class="flex flex-wrap gap-2.5">
+				<div>
+					<Select.Root portal={null} bind:selected={selectedAudio}>
+						<Select.Trigger class="w-[180px]">
+							<Select.Value placeholder="Select a song"/>
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Group>
+								<Select.Label>Playlist 1</Select.Label>
+								{#each songs as song}
+									<Select.Item value={song.value} label={song.label}>
+										{song.label}
+									</Select.Item>
+								{/each}
+							</Select.Group>
+						</Select.Content>
+						<Select.Input name="fileName" />
+					</Select.Root>
+				</div>
 
-				<Button>
-					<Play class="mr-2 h-4 w-4" />
-					Play
-				</Button>
+				<div class="grid grid-cols-2 gap-2.5">
+					<Button on:click={playAudio}>
+						<PlayCircle class="mr-2 h-4 w-4" />
+						Play
+					</Button>
+					<Button variant="destructive" on:click={abortAudio}>
+						<XOctagon class="mr-2 h-4 w-4" />
+						Stop
+					</Button>
+					<Button on:click={pauseAudio}>
+						<Pause class="mr-2 h-4 w-4" />
+						Pause
+					</Button>
+					<Button on:click={resumeAudio}>
+						<Play class="mr-2 h-4 w-4" />
+						Resume
+					</Button>
+				</div>
 			</Card.Content>
 			<Card.Footer>
 			</Card.Footer>
