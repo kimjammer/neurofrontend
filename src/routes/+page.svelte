@@ -139,12 +139,10 @@
 
 	//Sing Section
 	let selectedAudio : any;
-	$: console.log(selectedAudio);
 	let songs = [
 		{ value: "", label: "Loading..." }
 	];
 	socket.on("audio_list", (message) => {
-		console.log("Audio List: ", message);
 		songs = [];
 		message.forEach((song : any) => {
 			songs.push({ value: song, label: song });

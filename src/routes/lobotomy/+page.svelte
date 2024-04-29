@@ -31,11 +31,11 @@
 				<Textarea bind:value={lobotomy} placeholder="Current Context" class="resize-none h-full"/>
 			</Card.Content>
 			<Card.Footer class="gap-2.5">
-				<Button variant="default" on:click={nukeHistory}>
+				<Button variant="default">
 					<Send class="mr-2 w-4 h-4" />
 					Submit
 				</Button>
-				<Button variant="default">
+				<Button variant="default"on:click={nukeHistory}>
 					<Trash2 class="mr-2 w-4 h-4" />
 					Nuke History
 				</Button>

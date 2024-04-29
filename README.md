@@ -6,3 +6,11 @@ It is written on SvelteKit, and uses the shadcn-svelte components. This project 
 python backend.
 
 See [Neuro](https://github.com/kimjammer/Neuro)
+
+## Installation
+
+```
+npm install
+npm run build
+npm run preview
+```
