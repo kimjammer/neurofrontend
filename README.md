@@ -1,5 +1,7 @@
 # Neuro Front End
 
+![screenshot.png](images/screenshot.png)
+
 This is a control panel for my Neuro project.
 
 It is written on SvelteKit, and uses the shadcn-svelte components. This project uses socket.io to communicate to the
