@@ -8,7 +8,7 @@
 	import { Label } from "$lib/components/ui/label";
 	import { Switch } from "$lib/components/ui/switch";
 	import * as Select from "$lib/components/ui/select";
-
+	import {toast} from "svelte-sonner";
 	import { type Props } from "$lib/components/ui/button/.";
 
 	import {BrainCircuit, CircleOff, VolumeX, MicOff, Move, Play, Sparkles, Send, XOctagon, Pause, PlayCircle} from "lucide-svelte";
@@ -16,6 +16,10 @@
 	// Setup socket.io client
 	import { io } from "socket.io-client";
 	const socket = io("localhost:8080");
+
+	socket.on("error", (data) => {
+		toast.error(data);
+	});
 
 	//Current Message Section
 	let currentMessage = "";

@@ -5,6 +5,7 @@
 
 	import { Button } from "$lib/components/ui/button";
 	import { Sun, Moon } from "lucide-svelte";
+	import { Toaster } from "$lib/components/ui/sonner";
 </script>
 <svelte:head>
 	<title>Neuro Control Panel</title>
@@ -13,6 +14,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
 </svelte:head>
 
+<Toaster />
 <ModeWatcher />
 
 <div class="h-screen flex flex-col">

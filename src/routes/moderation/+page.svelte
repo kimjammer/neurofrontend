@@ -2,11 +2,15 @@
 	import * as Card from "$lib/components/ui/card";
 	import { Textarea } from "$lib/components/ui/textarea";
 	import { Button } from "$lib/components/ui/button";
-
+	import {toast} from "svelte-sonner";
 	import {Send} from "lucide-svelte";
 
 	import { io } from "socket.io-client";
 	const socket = io("localhost:8080");
+	socket.on("error", (data) => {
+		toast.error(data);
+	});
+
 
 	let blacklist: string;
 	function submitBlacklist() {
