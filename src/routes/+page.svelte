@@ -45,7 +45,6 @@
 	//Signals Section
 	let AI_thinking = false;
 	socket.on("AI_thinking", (message: boolean) => {
-		console.log("AI Thinking: ", message);
 		AI_thinking = message;
 	});
 	let AI_speaking = false;
@@ -54,7 +53,6 @@
 	});
 	let human_speaking = false;
 	socket.on("human_speaking", (message: boolean) => {
-		console.log("Human Speaking: ", message)
 		human_speaking = message;
 	});
 	let patiencePercent = 0;
@@ -71,7 +69,6 @@
 		twitchChat = message.join("\n");
 	});
 	socket.on("twitch_status", (message: boolean) => {
-		console.log("Twitch Chat Toggled: ", message);
 		twitchChatEnabled = message;
 	});
 	function toggleTwitchChat() {

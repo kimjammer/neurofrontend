@@ -33,6 +33,9 @@
 				<Button variant="link" href="/moderation" class="leading-7">
 					Moderation
 				</Button>
+				<Button variant="link" href="/memory" class="leading-7">
+					Memory
+				</Button>
 				<Button variant="link" href="/vtube" class="leading-7">
 					Vtube Studio
 				</Button>
