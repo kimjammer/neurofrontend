@@ -1,25 +1,14 @@
 <script lang="ts">
 	import * as Card from "$lib/components/ui/card";
 	import { Button } from "$lib/components/ui/button";
-	import { toast } from "svelte-sonner";
 	import {RefreshCcw} from "lucide-svelte";
 
-	// Setup socket.io client
-	import { io } from "socket.io-client";
-	const socket = io("localhost:8080");
-	socket.on("error", (data) => {
-		console.log(data)
-		toast.error(data);
-	});
+	import { socket, hotkeys } from "../socketio";
 
 	// Request list of Hotkeys
-	let hotkeys:any[] = [];
 	function getHotkeys() {
 		socket.emit("get_hotkeys");
 	}
-	socket.on("get_hotkeys", (data) => {
-		hotkeys = data;
-	});
 
 	// Send hotkey
 	function sendHotkey(hotkey: string) {
@@ -35,8 +24,6 @@
 	function moveModel(mode: string) {
 		socket.emit("move_model", mode);
 	}
-
-	getHotkeys();
 </script>
 
 <div class="w-full h-full flex border-t-2">
@@ -48,7 +35,7 @@
 			</Card.Header>
 			<Card.Content class="grow">
 				<div class="flex flex-wrap gap-2.5">
-					{#each hotkeys as hotkey}
+					{#each $hotkeys as hotkey}
 						<Button on:click={() => {sendHotkey(hotkey)}}>
 							{hotkey}
 						</Button>

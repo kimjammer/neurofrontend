@@ -2,29 +2,14 @@
 	import * as Card from "$lib/components/ui/card";
 	import { Textarea } from "$lib/components/ui/textarea";
 	import { Button } from "$lib/components/ui/button";
-	import {toast} from "svelte-sonner";
 	import {Send} from "lucide-svelte";
 
-	import { io } from "socket.io-client";
-	const socket = io("localhost:8080");
-	socket.on("error", (data) => {
-		toast.error(data);
-	});
+	import { socket, blacklist } from "../socketio";
 
-
-	let blacklist: string;
 	function submitBlacklist() {
-		let data = blacklist.split("\n")
+		let data = $blacklist.split("\n")
 		socket.emit("set_blacklist", data);
 	}
-
-	socket.on("get_blacklist", (data) => {
-		console.log(data);
-		blacklist = data.join("\n");
-	});
-
-	//Initalize UI
-	socket.emit("get_blacklist");
 </script>
 
 <div class="w-full h-full flex border-t-2">
@@ -35,7 +20,7 @@
 				<Card.Description>Edit word blacklist</Card.Description>
 			</Card.Header>
 			<Card.Content class="grow">
-				<Textarea placeholder="Current Blacklist" class="resize-none h-full" bind:value={blacklist}/>
+				<Textarea placeholder="Current Blacklist" class="resize-none h-full" bind:value={$blacklist}/>
 			</Card.Content>
 			<Card.Footer>
 				<Button variant="default" on:click={submitBlacklist}>

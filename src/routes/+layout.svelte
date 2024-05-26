@@ -6,6 +6,16 @@
 	import { Button } from "$lib/components/ui/button";
 	import { Sun, Moon } from "lucide-svelte";
 	import { Toaster } from "$lib/components/ui/sonner";
+
+	import { socket } from "./socketio"
+
+	let isConnected = false;
+	socket.on("connect", () => {
+		isConnected = true;
+	});
+	socket.on("disconnect", () => {
+		isConnected = false;
+	});
 </script>
 <svelte:head>
 	<title>Neuro Control Panel</title>
@@ -14,7 +24,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
 </svelte:head>
 
-<Toaster />
+<Toaster richColors/>
 <ModeWatcher />
 
 <div class="h-screen flex flex-col">
@@ -42,11 +52,17 @@
 			</div>
 		</div>
 		<div class="h-full flex justify-end items-center gap-[25px]">
+			{#if !isConnected}
+				<span class="h-5 w-5 rounded-full bg-red-500"></span>
+			{:else}
+				<span class="h-5 w-5 rounded-full bg-green-500"></span>
+			{/if}
+
 			<div class="text-lg font-semibold text-right">Welcome, KimJammer</div>
 
 			<Avatar.Root>
 				<Avatar.Image src="https://www.kimjammer.com/icons/Logo.svg" alt="@shadcn" />
-				<Avatar.Fallback>CN</Avatar.Fallback>
+				<Avatar.Fallback>KJ</Avatar.Fallback>
 			</Avatar.Root>
 
 			<Button on:click={toggleMode} variant="outline" size="icon">

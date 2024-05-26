@@ -4,24 +4,14 @@
 	import { Separator } from "$lib/components/ui/separator/index.js";
 	import { Button } from "$lib/components/ui/button";
 	import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
-	import {toast} from "svelte-sonner";
+	import {Input} from "$lib/components/ui/input";
 	import {Trash2, FileDown, FileUp, Search, Send} from "lucide-svelte";
 
-	import { io } from "socket.io-client";
-	import {Input} from "$lib/components/ui/input";
-	const socket = io("localhost:8080");
-	socket.on("error", (data) => {
-		toast.error(data);
-	});
+	import { socket, memories, searchQuery } from "../socketio";
 
-	let memories: any = [];
-	let searchQuery = "";
 	function getMemories() {
-		socket.emit("get_memories", searchQuery);
+		socket.emit("get_memories", $searchQuery);
 	}
-	socket.on("get_memories", (data) => {
-		memories = data;
-	});
 
 	function clearShortTerm() {
 		socket.emit("clear_short_term");
@@ -55,7 +45,7 @@
 			</Card.Header>
 			<Card.Content class="grow">
 				<div class="flex gap-2.5">
-					<Input placeholder="search query (optional)" class="" bind:value={searchQuery}/>
+					<Input placeholder="search query (optional)" class="" bind:value={$searchQuery}/>
 					<Button variant="default" on:click={getMemories}>
 						<Search class="mr-2 w-4 h-4" />
 						Search
@@ -63,7 +53,7 @@
 				</div>
 				<Separator class="my-2" />
 				<ScrollArea class="h-[500px]">
-					{#each memories as memory}
+					{#each $memories as memory}
 						<div class="flex justify-between">
 							<Collapsible.Root>
 								<Collapsible.Trigger>
