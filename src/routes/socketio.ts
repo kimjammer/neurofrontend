@@ -61,6 +61,7 @@ export let LLMEnabled = writable(true);
 export let TTSEnabled = writable(true);
 export let STTEnabled = writable(true);
 export let movementEnabled = writable(true);
+export let multimodalEnabled = writable(true);
 socket.on("LLM_status", (message: boolean) => {
 	LLMEnabled.set(message);
 });
@@ -72,6 +73,9 @@ socket.on("STT_status", (message: boolean) => {
 });
 socket.on("movement_status", (message: boolean) => {
 	movementEnabled.set(message);
+});
+socket.on("multimodal_status", (message: boolean) => {
+	multimodalEnabled.set(message);
 });
 
 //Sing Section

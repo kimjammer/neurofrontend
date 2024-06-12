@@ -25,6 +25,7 @@
 		LLMEnabled,
 		TTSEnabled,
 		STTEnabled,
+		multimodalEnabled,
 		movementEnabled,
 		selectedAudio,
 		songs} from "./socketio";
@@ -88,6 +89,14 @@
 			socket.emit("enable_movement");
 		} else {
 			socket.emit("disable_movement");
+		}
+	}
+	function toggleMultimodal() {
+		multimodalEnabled.set(! $multimodalEnabled);
+		if ($multimodalEnabled) {
+			socket.emit("enable_multimodal");
+		} else {
+			socket.emit("disable_multimodal");
 		}
 	}
 
@@ -179,7 +188,7 @@
 			<Card.Content class="grow">
 				<Textarea disabled placeholder="Twitch messages" class="resize-none h-full" bind:value={$twitchChat}/>
 			</Card.Content>
-			<Card.Footer class="fl ex gap-2.5">
+			<Card.Footer class="flex gap-2.5">
 				<Label for="twitchSwitch">Enable Twitch Chat: </Label>
 				<Switch id="twitchSwitch" bind:checked={$twitchChatEnabled} on:click={toggleTwitchChat}/>
 			</Card.Footer>
@@ -208,7 +217,9 @@
 					Disable Movement
 				</Button>
 			</Card.Content>
-			<Card.Footer>
+			<Card.Footer class="flex gap-2.5">
+				<Label for="multimodalSwitch">Enable Vision: </Label>
+				<Switch id="multimodalSwitch" bind:checked={$multimodalEnabled} on:click={toggleMultimodal}/>
 			</Card.Footer>
 		</Card.Root>
 
